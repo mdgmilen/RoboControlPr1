@@ -104,17 +104,18 @@ class HandTrackingDynamic:
             return None  # No command
         dx = self.endPoint[0] - self.startPoint[0]  # Calculate x-axis movement
         dy = self.endPoint[1] - self.startPoint[1]  # Calculate y-axis movement
+        thresholdSMovement = 50  # Threshold for significant movement
         if abs(dx) > abs(dy):  # Horizontal movement
-            if dx > 20:  # Threshold for significant movement
+            if dx > thresholdSMovement:  # Threshold for significant movement
                 return "TURN LEFT"  # Command: Move Left
-            elif dx < -20:
+            elif dx < -thresholdSMovement:
                 return "TURN RIGHT"  # Command: Move Right
         else:  # Vertical movement
-            if dy > 20:
+            if dy > thresholdSMovement:
                 return "MOVE BACKWARDS"  # Command: Move Backwards
-            elif dy < -20:
+            elif dy < -thresholdSMovement:
                 return "MOVE STRAIGHT"  # Command: Move Straight
-        return None  # No significant movement
+        return "STILL STOP"  # No significant movement
 
     def processMovement(self):
         # Process the movement and detect commands
@@ -124,10 +125,12 @@ class HandTrackingDynamic:
             self.startPoint = None  # Reset start point
             self.endPoint = None  # Reset end point
         elif self.lmsList:  # If landmarks are detected
+        # if sum(fingers) == 4:  # All fingers down (fist)
             palmX, palmY = self.lmsList[0][1:]  # Palm center (landmark 0)
             if not self.startPoint:  # If no start point
                 self.startPoint = (palmX, palmY)  # Set start point
             else:  # If start point exists
+                # time.sleep(0.3)
                 self.endPoint = (palmX, palmY)  # Update end point
                 self.movementCommand = self.detectCommand()  # Detect command
         return self.movementCommand  # Return the movement command
